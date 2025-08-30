@@ -1,51 +1,43 @@
-let [hours, minutes, seconds, milliseconds] = [0, 0, 0, 0];
+let startTime = null;
+let elapsed = 0;
 let timer = null;
 let running = false;
 
 function updateDisplay() {
-    let h = hours.toString().padStart(2, "0");
-    let m = minutes.toString().padStart(2, "0");
-    let s = seconds.toString().padStart(2, "0");
-    let ms = milliseconds.toString().padStart(2, "0");
+  let time = Date.now() - startTime + elapsed; // geçen toplam süre (ms)
+  
+  let hours = Math.floor(time / 3600000);
+  let minutes = Math.floor((time % 3600000) / 60000);
+  let seconds = Math.floor((time % 60000) / 1000);
+  let milliseconds = Math.floor((time % 1000) / 10);
 
-    document.getElementById("display").innerText = `${h}:${m}:${s}:${ms}`;
-}
-
-function stopwatch() {
-    milliseconds++;
-    if (milliseconds === 100) { // 100 salise = 1 saniye
-        milliseconds = 0;
-        seconds++;
-    }
-    if (seconds === 60) {
-        seconds = 0;
-        minutes++;
-    }
-    if (minutes === 60) {
-        minutes = 0;
-        hours++;
-    }
-    updateDisplay();
+  document.getElementById("display").innerText =
+    `${hours.toString().padStart(2,"0")}:` +
+    `${minutes.toString().padStart(2,"0")}:` +
+    `${seconds.toString().padStart(2,"0")}:` +
+    `${milliseconds.toString().padStart(2,"0")}`;
 }
 
 function start() {
-    if (!running) { // tekrar tekrar basınca hızlanmasın
-        timer = setInterval(stopwatch, 10); // her 10ms'de bir çalışsın
-        running = true;
-    }
+  if (!running) {
+    startTime = Date.now();
+    timer = setInterval(updateDisplay, 10);
+    running = true;
+  }
 }
 
 function stop() {
+  if (running) {
     clearInterval(timer);
+    elapsed += Date.now() - startTime;
     running = false;
+  }
 }
 
 function reset() {
-    clearInterval(timer);
-    [hours, minutes, seconds, milliseconds] = [0, 0, 0, 0];
-    running = false;
-    updateDisplay();
+  clearInterval(timer);
+  elapsed = 0;
+  startTime = null;
+  running = false;
+  document.getElementById("display").innerText = "00:00:00:00";
 }
-
-// İlk ekranda sıfırları göstermek için
-updateDisplay();
